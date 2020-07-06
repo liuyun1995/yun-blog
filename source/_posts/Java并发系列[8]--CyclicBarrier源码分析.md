@@ -1,12 +1,13 @@
 ---
-title: 'Java并发系列[8]--CyclicBarrier源码分析'
+title: 'Java 并发系列[8]--CyclicBarrier 源码分析'
 date: 2019-11-10 21:00:24
 categories: Java并发
 ---
-现实生活中我们经常会遇到这样的情景，在进行某个活动前需要等待人全部都齐了才开始。例如吃饭时要等全家人都上座了才动筷子，旅游时要等全部人都到齐了才出发，比赛时要等运动员都上场后才开始。在JUC包中为我们提供了一个同步工具类能够很好的模拟这类场景，它就是CyclicBarrier类。<!-- more -->利用CyclicBarrier类可以实现一组线程相互等待，当所有线程都到达某个屏障点后再进行后续的操作。下图演示了这一过程。
-![](img1.gif)
+现实生活中我们经常会遇到这样的情景，在进行某个活动前需要等待人全部都齐了才开始。例如吃饭时要等全家人都上座了才动筷子，旅游时要等全部人都到齐了才出发，比赛时要等运动员都上场后才开始。在 JUC 包中为我们提供了一个同步工具类能够很好的模拟这类场景，它就是 CyclicBarrier 类。<!-- more -->利用 CyclicBarrier 类可以实现一组线程相互等待，当所有线程都到达某个屏障点后再进行后续的操作。下图演示了这一过程。
+![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B8%5D--CyclicBarrier%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.gif)
 
-在CyclicBarrier类的内部有一个计数器，每个线程在到达屏障点的时候都会调用await方法将自己阻塞，此时计数器会减1，当计数器减为0的时候所有因调用await方法而被阻塞的线程将被唤醒。这就是实现一组线程相互等待的原理，下面我们先看看CyclicBarrier有哪些成员变量。
+在 CyclicBarrier 类的内部有一个计数器，每个线程在到达屏障点的时候都会调用 await 方法将自己阻塞，此时计数器会减 1，当计数器减为 0 的时候所有因调用 await 方法而被阻塞的线程将被唤醒。这就是实现一组线程相互等待的原理，下面我们先看看 CyclicBarrier 有哪些成员变量。
+
 ```java
 //同步操作锁
 private final ReentrantLock lock = new ReentrantLock();
@@ -26,7 +27,9 @@ private static class Generation {
     boolean broken = false;
 }
 ```
-上面贴出了CyclicBarrier所有的成员变量，可以看到CyclicBarrier内部是通过条件队列trip来对线程进行阻塞的，并且其内部维护了两个int型的变量parties和count，parties表示每次拦截的线程数，该值在构造时进行赋值。count是内部计数器，它的初始值和parties相同，以后随着每次await方法的调用而减1，直到减为0就将所有线程唤醒。CyclicBarrier有一个静态内部类Generation，该类的对象代表栅栏的当前代，就像玩游戏时代表的本局游戏，利用它可以实现循环等待。barrierCommand表示换代前执行的任务，当count减为0时表示本局游戏结束，需要转到下一局。在转到下一局游戏之前会将所有阻塞的线程唤醒，在唤醒所有线程之前你可以通过指定barrierCommand来执行自己的任务。接下来我们看看它的构造器。
+
+上面贴出了 CyclicBarrier 所有的成员变量，可以看到 CyclicBarrier 内部是通过条件队列 trip 来对线程进行阻塞的，并且其内部维护了两个 int 型的变量 parties 和 count，parties 表示每次拦截的线程数，该值在构造时进行赋值。count 是内部计数器，它的初始值和 parties 相同，以后随着每次 await 方法的调用而减 1，直到减为 0 就将所有线程唤醒。CyclicBarrier 有一个静态内部类 Generation，该类的对象代表栅栏的当前代，就像玩游戏时代表的本局游戏，利用它可以实现循环等待。barrierCommand 表示换代前执行的任务，当 count 减为 0 时表示本局游戏结束，需要转到下一局。在转到下一局游戏之前会将所有阻塞的线程唤醒，在唤醒所有线程之前你可以通过指定 barrierCommand 来执行自己的任务。接下来我们看看它的构造器。
+
 ```java
 //构造器1
 public CyclicBarrier(int parties, Runnable barrierAction) {
@@ -41,7 +44,9 @@ public CyclicBarrier(int parties) {
     this(parties, null);
 }
 ```
-CyclicBarrier有两个构造器，其中构造器1是它的核心构造器，在这里你可以指定本局游戏的参与者数量(要拦截的线程数)以及本局结束时要执行的任务，还可以看到计数器count的初始值被设置为parties。CyclicBarrier类最主要的功能就是使先到达屏障点的线程阻塞并等待后面的线程，其中它提供了两种等待的方法，分别是定时等待和非定时等待。
+
+CyclicBarrier 有两个构造器，其中构造器 1 是它的核心构造器，在这里你可以指定本局游戏的参与者数量(要拦截的线程数)以及本局结束时要执行的任务，还可以看到计数器 count 的初始值被设置为 parties。CyclicBarrier 类最主要的功能就是使先到达屏障点的线程阻塞并等待后面的线程，其中它提供了两种等待的方法，分别是定时等待和非定时等待。
+
 ```java
 //非定时等待
 public int await() throws InterruptedException, BrokenBarrierException {
@@ -57,7 +62,9 @@ public int await(long timeout, TimeUnit unit) throws InterruptedException, Broke
     return dowait(true, unit.toNanos(timeout));
 }
 ```
-可以看到不管是定时等待还是非定时等待，它们都调用了dowait方法，只不过是传入的参数不同而已。下面我们就来看看dowait方法都做了些什么。
+
+可以看到不管是定时等待还是非定时等待，它们都调用了 dowait 方法，只不过是传入的参数不同而已。下面我们就来看看 dowait 方法都做了些什么。
+
 ```java
 //核心等待方法
 private int dowait(boolean timed, long nanos) throws InterruptedException, BrokenBarrierException, TimeoutException {
@@ -139,7 +146,9 @@ private int dowait(boolean timed, long nanos) throws InterruptedException, Broke
     }
 }
 ```
-上面贴出的代码中注释都比较详细，我们只挑一些重要的来讲。可以看到在dowait方法中每次都将count减1，减完后立马进行判断看看是否等于0，如果等于0的话就会先去执行之前指定好的任务，执行完之后再调用nextGeneration方法将栅栏转到下一代，在该方法中会将所有线程唤醒，将计数器的值重新设为parties，最后会重新设置栅栏代次，在执行完nextGeneration方法之后就意味着游戏进入下一局。如果计数器此时还不等于0的话就进入for循环，根据参数来决定是调用trip.awaitNanos(nanos)还是trip.await()方法，这两方法对应着定时和非定时等待。如果在等待过程中当前线程被中断就会执行breakBarrier方法，该方法叫做打破栅栏，意味着游戏在中途被掐断，设置generation的broken状态为true并唤醒所有线程。同时这也说明在等待过程中有一个线程被中断整盘游戏就结束，所有之前被阻塞的线程都会被唤醒。线程醒来后会执行下面三个判断，看看是否因为调用breakBarrier方法而被唤醒，如果是则抛出异常；看看是否是正常的换代操作而被唤醒，如果是则返回计数器的值；看看是否因为超时而被唤醒，如果是的话就调用breakBarrier打破栅栏并抛出异常。这里还需要注意的是，如果其中有一个线程因为等待超时而退出，那么整盘游戏也会结束，其他线程都会被唤醒。下面贴出nextGeneration方法和breakBarrier方法的具体代码。
+
+上面贴出的代码中注释都比较详细，我们只挑一些重要的来讲。可以看到在 dowait 方法中每次都将 count 减 1，减完后立马进行判断看看是否等于 0，如果等于 0 的话就会先去执行之前指定好的任务，执行完之后再调用 nextGeneration 方法将栅栏转到下一代，在该方法中会将所有线程唤醒，将计数器的值重新设为 parties，最后会重新设置栅栏代次，在执行完 nextGeneration 方法之后就意味着游戏进入下一局。如果计数器此时还不等于 0 的话就进入 for 循环，根据参数来决定是调用 trip.awaitNanos(nanos)还是 trip.await()方法，这两方法对应着定时和非定时等待。如果在等待过程中当前线程被中断就会执行 breakBarrier 方法，该方法叫做打破栅栏，意味着游戏在中途被掐断，设置 generation 的 broken 状态为 true 并唤醒所有线程。同时这也说明在等待过程中有一个线程被中断整盘游戏就结束，所有之前被阻塞的线程都会被唤醒。线程醒来后会执行下面三个判断，看看是否因为调用 breakBarrier 方法而被唤醒，如果是则抛出异常；看看是否是正常的换代操作而被唤醒，如果是则返回计数器的值；看看是否因为超时而被唤醒，如果是的话就调用 breakBarrier 打破栅栏并抛出异常。这里还需要注意的是，如果其中有一个线程因为等待超时而退出，那么整盘游戏也会结束，其他线程都会被唤醒。下面贴出 nextGeneration 方法和 breakBarrier 方法的具体代码。
+
 ```java
 //切换栅栏到下一代
 private void nextGeneration() {
@@ -161,18 +170,20 @@ private void breakBarrier() {
     trip.signalAll();
 }
 ```
-上面我们已经通过源码将CyclicBarrier的原理基本都讲清楚了，下面我们就通过一个赛马的例子来深入掌握它的使用。
+
+上面我们已经通过源码将 CyclicBarrier 的原理基本都讲清楚了，下面我们就通过一个赛马的例子来深入掌握它的使用。
+
 ```java
 class Horse implements Runnable {
-    
+  
     private static int counter = 0;
     private final int id = counter++;
     private int strides = 0;
     private static Random rand = new Random(47);
     private static CyclicBarrier barrier;
-    
+  
     public Horse(CyclicBarrier b) { barrier = b; }
-    
+  
     @Override
     public void run() {
         try {
@@ -187,7 +198,7 @@ class Horse implements Runnable {
             e.printStackTrace();
         }
     }
-    
+  
     public String tracks() {
         StringBuilder s = new StringBuilder();
         for(int i = 0; i < getStrides(); i++) {
@@ -196,18 +207,18 @@ class Horse implements Runnable {
         s.append(id);
         return s.toString();
     }
-    
+  
     public synchronized int getStrides() { return strides; }
     public String toString() { return "Horse " + id + " "; }
-    
+  
 }
 
 public class HorseRace implements Runnable {
-    
+  
     private static final int FINISH_LINE = 75;
     private static List<Horse> horses = new ArrayList<Horse>();
     private static ExecutorService exec = Executors.newCachedThreadPool();
-    
+  
     @Override
     public void run() {
         StringBuilder s = new StringBuilder();
@@ -235,7 +246,7 @@ public class HorseRace implements Runnable {
             System.out.println("barrier-action sleep interrupted");
         }
     }
-    
+  
     public static void main(String[] args) {
         CyclicBarrier barrier = new CyclicBarrier(7, new HorseRace());
         for(int i = 0; i < 7; i++) {
@@ -244,10 +255,11 @@ public class HorseRace implements Runnable {
             exec.execute(horse);
         }
     }
-    
+  
 }
 ```
-该赛马程序主要是通过在控制台不停的打印各赛马的当前轨迹，以此达到动态显示的效果。整场比赛有多个轮次，每一轮次各个赛马都会随机走上几步然后调用await方法进行等待，当所有赛马走完一轮的时候将会执行任务将所有赛马的当前轨迹打印到控制台上。这样每一轮下来各赛马的轨迹都在不停的增长，当其中某个赛马的轨迹最先增长到指定的值的时候将会结束整场比赛，该赛马成为整场比赛的胜利者！程序的运行结果如下：
-![](img2.gif)
 
-至此我们难免会将CyclicBarrier与CountDownLatch进行一番比较。这两个类都可以实现一组线程在到达某个条件之前进行等待，它们内部都有一个计数器，当计数器的值不断的减为0的时候所有阻塞的线程将会被唤醒。有区别的是CyclicBarrier的计数器由自己控制，而CountDownLatch的计数器则由使用者来控制，在CyclicBarrier中线程调用await方法不仅会将自己阻塞还会将计数器减1，而在CountDownLatch中线程调用await方法只是将自己阻塞而不会减少计数器的值。另外，CountDownLatch只能拦截一轮，而CyclicBarrier可以实现循环拦截。一般来说用CyclicBarrier可以实现CountDownLatch的功能，而反之则不能，例如上面的赛马程序就只能使用CyclicBarrier来实现。总之，这两个类的异同点大致如此，至于何时使用CyclicBarrier，何时使用CountDownLatch，还需要读者自己去拿捏。
+该赛马程序主要是通过在控制台不停的打印各赛马的当前轨迹，以此达到动态显示的效果。整场比赛有多个轮次，每一轮次各个赛马都会随机走上几步然后调用 await 方法进行等待，当所有赛马走完一轮的时候将会执行任务将所有赛马的当前轨迹打印到控制台上。这样每一轮下来各赛马的轨迹都在不停的增长，当其中某个赛马的轨迹最先增长到指定的值的时候将会结束整场比赛，该赛马成为整场比赛的胜利者！程序的运行结果如下：
+![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B8%5D--CyclicBarrier%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.gif)
+
+至此我们难免会将 CyclicBarrier 与 CountDownLatch 进行一番比较。这两个类都可以实现一组线程在到达某个条件之前进行等待，它们内部都有一个计数器，当计数器的值不断的减为 0 的时候所有阻塞的线程将会被唤醒。有区别的是 CyclicBarrier 的计数器由自己控制，而 CountDownLatch 的计数器则由使用者来控制，在 CyclicBarrier 中线程调用 await 方法不仅会将自己阻塞还会将计数器减 1，而在 CountDownLatch 中线程调用 await 方法只是将自己阻塞而不会减少计数器的值。另外，CountDownLatch 只能拦截一轮，而 CyclicBarrier 可以实现循环拦截。一般来说用 CyclicBarrier 可以实现 CountDownLatch 的功能，而反之则不能，例如上面的赛马程序就只能使用 CyclicBarrier 来实现。总之，这两个类的异同点大致如此，至于何时使用 CyclicBarrier，何时使用 CountDownLatch，还需要读者自己去拿捏。

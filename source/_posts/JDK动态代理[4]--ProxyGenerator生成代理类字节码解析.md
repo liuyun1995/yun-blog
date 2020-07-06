@@ -1,9 +1,10 @@
 ---
-title: 'JDK动态代理[4]--ProxyGenerator生成代理类字节码解析'
+title: 'JDK 动态代理[4]--ProxyGenerator 生成代理类字节码解析'
 date: 2018-01-05 15:50:35
 categories: Java基础
 ---
-通过前面几篇的分析，我们知道代理类是通过Proxy类的ProxyClassFactory工厂生成的，这个工厂类会去调用ProxyGenerator类的generateProxyClass()方法来生成代理类的字节码。ProxyGenerator这个类存放在sun.misc包下，我们可以通过OpenJDK源码来找到这个类，该类的generateProxyClass()静态方法的核心内容就是去调用generateClassFile()实例方法来生成Class文件。我们直接来看generateClassFile()这个方法内部做了些什么。<!-- more -->
+通过前面几篇的分析，我们知道代理类是通过 Proxy 类的 ProxyClassFactory 工厂生成的，这个工厂类会去调用 ProxyGenerator 类的 generateProxyClass()方法来生成代理类的字节码。ProxyGenerator 这个类存放在 sun.misc 包下，我们可以通过 OpenJDK 源码来找到这个类，该类的 generateProxyClass()静态方法的核心内容就是去调用 generateClassFile()实例方法来生成 Class 文件。我们直接来看 generateClassFile()这个方法内部做了些什么。<!-- more -->
+
 ```java
 private byte[] generateClassFile() {
     //第一步, 将所有的方法组装成ProxyMethod对象
@@ -22,7 +23,7 @@ private byte[] generateClassFile() {
     for (List<ProxyMethod> sigmethods : proxyMethods.values()) {
         checkReturnTypes(sigmethods);
     }
-    
+  
     //第二步, 组装要生成的class文件的所有的字段信息和方法信息
     try {
         //添加构造器方法
@@ -42,7 +43,7 @@ private byte[] generateClassFile() {
     } catch (IOException e) {
         throw new InternalError("unexpected I/O Exception");
     }
-    
+  
     //验证方法和字段集合不能大于65535
     if (methods.size() > 65535) {
         throw new IllegalArgumentException("method limit exceeded");
@@ -62,7 +63,7 @@ private byte[] generateClassFile() {
     }
     //接下来要开始写入文件了,设置常量池只读
     cp.setReadOnly();
-    
+  
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     DataOutputStream dout = new DataOutputStream(bout);
     try {
@@ -107,18 +108,20 @@ private byte[] generateClassFile() {
     return bout.toByteArray();
 }
 ```
-可以看到generateClassFile()方法是按照Class文件结构进行动态拼接的。什么是Class文件呢？在这里我们先要说明下，我们平时编写的Java文件是以.java结尾的，在编写好了之后通过编译器进行编译会生成.class文件，这个.class文件就是Class文件。Java程序的执行只依赖于Class文件，和Java文件是没有关系的。这个Class文件描述了一个类的信息，当我们需要使用到一个类时，Java虚拟机就会提前去加载这个类的Class文件并进行初始化和相关的检验工作，Java虚拟机能够保证在你使用到这个类之前就会完成这些工作，我们只需要安心的去使用它就好了，而不必关心Java虚拟机是怎样加载它的。当然，Class文件并不一定非得通过编译Java文件而来，你甚至可以直接通过文本编辑器来编写Class文件。在这里，JDK动态代理就是通过程序来动态生成Class文件的。我们再次回到上面的代码中，可以看到，生成Class文件主要分为三步：
-第一步：收集所有要生成的代理方法，将其包装成ProxyMethod对象并注册到Map集合中。
-第二步：收集所有要为Class文件生成的字段信息和方法信息。
-第三步：完成了上面的工作后，开始组装Class文件。
+
+可以看到 generateClassFile()方法是按照 Class 文件结构进行动态拼接的。什么是 Class 文件呢？在这里我们先要说明下，我们平时编写的 Java 文件是以.java 结尾的，在编写好了之后通过编译器进行编译会生成.class 文件，这个.class 文件就是 Class 文件。Java 程序的执行只依赖于 Class 文件，和 Java 文件是没有关系的。这个 Class 文件描述了一个类的信息，当我们需要使用到一个类时，Java 虚拟机就会提前去加载这个类的 Class 文件并进行初始化和相关的检验工作，Java 虚拟机能够保证在你使用到这个类之前就会完成这些工作，我们只需要安心的去使用它就好了，而不必关心 Java 虚拟机是怎样加载它的。当然，Class 文件并不一定非得通过编译 Java 文件而来，你甚至可以直接通过文本编辑器来编写 Class 文件。在这里，JDK 动态代理就是通过程序来动态生成 Class 文件的。我们再次回到上面的代码中，可以看到，生成 Class 文件主要分为三步：
+第一步：收集所有要生成的代理方法，将其包装成 ProxyMethod 对象并注册到 Map 集合中。
+第二步：收集所有要为 Class 文件生成的字段信息和方法信息。
+第三步：完成了上面的工作后，开始组装 Class 文件。
 我们知道一个类的核心部分就是它的字段和方法。我们重点聚焦第二步，看看它为代理类生成了哪些字段和方法。在第二步中，按顺序做了下面四件事。
 
-1.为代理类生成一个带参构造器，传入InvocationHandler实例的引用并调用父类的带参构造器。
-2.遍历代理方法Map集合，为每个代理方法生成对应的Method类型静态域，并将其添加到fields集合中。
-3.遍历代理方法Map集合，为每个代理方法生成对应的MethodInfo对象，并将其添加到methods集合中。
+1.为代理类生成一个带参构造器，传入 InvocationHandler 实例的引用并调用父类的带参构造器。
+2.遍历代理方法 Map 集合，为每个代理方法生成对应的 Method 类型静态域，并将其添加到 fields 集合中。
+3.遍历代理方法 Map 集合，为每个代理方法生成对应的 MethodInfo 对象，并将其添加到 methods 集合中。
 4.为代理类生成静态初始化方法，该静态初始化方法主要是将每个代理方法的引用赋值给对应的静态字段。
 
-通过以上分析，我们可以大致知道JDK动态代理最终会为我们生成如下结构的代理类：
+通过以上分析，我们可以大致知道 JDK 动态代理最终会为我们生成如下结构的代理类：
+
 ```java
 public class Proxy0 extends Proxy implements UserDao {
 
@@ -132,7 +135,7 @@ public class Proxy0 extends Proxy implements UserDao {
     private static Method m2;   //equals方法
     private static Method m3;   //toString方法
     private static Method m4;   //...
-    
+  
     //第三步, 生成代理方法
     @Override
     public int hashCode() {
@@ -142,7 +145,7 @@ public class Proxy0 extends Proxy implements UserDao {
             throw new UndeclaredThrowableException(e);
         }
     }
-    
+  
     @Override
     public boolean equals(Object obj) {
         try {
@@ -152,7 +155,7 @@ public class Proxy0 extends Proxy implements UserDao {
             throw new UndeclaredThrowableException(e);
         }
     }
-    
+  
     @Override
     public String toString() {
         try {
@@ -161,7 +164,7 @@ public class Proxy0 extends Proxy implements UserDao {
             throw new UndeclaredThrowableException(e);
         }
     }
-    
+  
     @Override
     public void save(User user) {
         try {
@@ -172,12 +175,12 @@ public class Proxy0 extends Proxy implements UserDao {
             throw new UndeclaredThrowableException(e);
         }
     }
-    
+  
     //第四步, 生成静态初始化方法
     static {
         try {
             Class c1 = Class.forName(Object.class.getName());
-            Class c2 = Class.forName(UserDao.class.getName());    
+            Class c2 = Class.forName(UserDao.class.getName());  
             m1 = c1.getMethod("hashCode", null);
             m2 = c1.getMethod("equals", new Class[]{Object.class});
             m3 = c1.getMethod("toString", null);
@@ -187,13 +190,14 @@ public class Proxy0 extends Proxy implements UserDao {
             e.printStackTrace();
         }
     }
-    
+  
 }
 ```
-至此，经过层层分析，深入探究JDK源码，我们还原了动态生成的代理类的本来面目，之前心中存在的一些疑问也随之得到了很好的解释
-1.代理类默认继承Porxy类，因为Java中只支持单继承，所以JDK动态代理只能去实现接口。
-2.代理方法都会去调用InvocationHandler的invoke()方法，因此我们需要重写InvocationHandler的invoke()方法。
-3.调用invoke()方法时会传入代理实例本身，目标方法和目标方法参数。解释了invoke()方法的参数是怎样来的。
-![](img1.png)
 
-使用刚刚构造出来的Proxy0作为代理类再次进行测试，可以看到最终的结果与使用JDK动态生成的代理类的效果是一样的。再次验证了我们的分析是可靠且准确的。至此，JDK动态代理系列文章宣告结束。通过本系列的分析，笔者解决了心中长久以来的疑惑，相信读者们对JDK动态代理的理解也更深了一步。但是纸上得来终觉浅，想要更好的掌握JDK动态代理技术，读者可参照本系列文章自行查阅JDK源码，也可与笔者交流学习心得，指出笔者分析不当的地方，共同学习，共同进步。
+至此，经过层层分析，深入探究 JDK 源码，我们还原了动态生成的代理类的本来面目，之前心中存在的一些疑问也随之得到了很好的解释
+1.代理类默认继承 Porxy 类，因为 Java 中只支持单继承，所以 JDK 动态代理只能去实现接口。
+2.代理方法都会去调用 InvocationHandler 的 invoke()方法，因此我们需要重写 InvocationHandler 的 invoke()方法。
+3.调用 invoke()方法时会传入代理实例本身，目标方法和目标方法参数。解释了 invoke()方法的参数是怎样来的。
+![](https://gitee.com/liuyun1995/BlogImage/raw/master/JDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%5B4%5D--ProxyGenerator%E7%94%9F%E6%88%90%E4%BB%A3%E7%90%86%E7%B1%BB%E5%AD%97%E8%8A%82%E7%A0%81%E8%A7%A3%E6%9E%90/img1.png)
+
+使用刚刚构造出来的 Proxy0 作为代理类再次进行测试，可以看到最终的结果与使用 JDK 动态生成的代理类的效果是一样的。再次验证了我们的分析是可靠且准确的。至此，JDK 动态代理系列文章宣告结束。通过本系列的分析，笔者解决了心中长久以来的疑惑，相信读者们对 JDK 动态代理的理解也更深了一步。但是纸上得来终觉浅，想要更好的掌握 JDK 动态代理技术，读者可参照本系列文章自行查阅 JDK 源码，也可与笔者交流学习心得，指出笔者分析不当的地方，共同学习，共同进步。

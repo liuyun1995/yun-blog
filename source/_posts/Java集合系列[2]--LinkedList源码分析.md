@@ -1,12 +1,13 @@
 ---
-title: 'Java集合系列[2]--LinkedList源码分析'
+title: 'Java 集合系列[2]--LinkedList 源码分析'
 date: 2018-01-17 16:08:12
 categories: Java基础
 ---
-上篇我们分析了ArrayList的底层实现，知道了ArrayList底层是基于数组实现的，因此具有查找修改快而插入删除慢的特点。本篇介绍的LinkedList是List接口的另一种实现，它的底层是基于双向链表实现的，因此它具有插入删除快而查找修改慢的特点，此外，通过对双向链表的操作还可以实现队列和栈的功能。LinkedList的底层结构如下图所示。<!-- more -->
-![](img1.png)
+上篇我们分析了 ArrayList 的底层实现，知道了 ArrayList 底层是基于数组实现的，因此具有查找修改快而插入删除慢的特点。本篇介绍的 LinkedList 是 List 接口的另一种实现，它的底层是基于双向链表实现的，因此它具有插入删除快而查找修改慢的特点，此外，通过对双向链表的操作还可以实现队列和栈的功能。LinkedList 的底层结构如下图所示。<!-- more -->
+![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
 
-F表示头结点引用，L表示尾结点引用，链表的每个结点都有三个元素，分别是前继结点引用(P)，结点元素的值(E)，后继结点的引用(N)。结点由内部类Node表示，我们看看它的内部结构。
+F 表示头结点引用，L 表示尾结点引用，链表的每个结点都有三个元素，分别是前继结点引用(P)，结点元素的值(E)，后继结点的引用(N)。结点由内部类 Node 表示，我们看看它的内部结构。
+
 ```java
 //结点内部类
 private static class Node<E> {
@@ -21,7 +22,9 @@ private static class Node<E> {
     }
 }
 ```
-Node这个内部类其实很简单，只有三个成员变量和一个构造器，item表示结点的值，next为下一个结点的引用，prev为上一个结点的引用，通过构造器传入这三个值。接下来再看看LinkedList的成员变量和构造器。
+
+Node 这个内部类其实很简单，只有三个成员变量和一个构造器，item 表示结点的值，next 为下一个结点的引用，prev 为上一个结点的引用，通过构造器传入这三个值。接下来再看看 LinkedList 的成员变量和构造器。
+
 ```java
 //集合元素个数
 transient int size = 0;
@@ -41,7 +44,9 @@ public LinkedList(Collection<? extends E> c) {
     addAll(c);
 }
 ```
-LinkedList持有头结点的引用和尾结点的引用，它有两个构造器，一个是无参构造器，一个是传入外部集合的构造器。与ArrayList不同的是LinkedList没有指定初始大小的构造器。看看它的增删改查方法。
+
+LinkedList 持有头结点的引用和尾结点的引用，它有两个构造器，一个是无参构造器，一个是传入外部集合的构造器。与 ArrayList 不同的是 LinkedList 没有指定初始大小的构造器。看看它的增删改查方法。
+
 ```java
 //增(添加)
 public boolean add(E e) {
@@ -113,7 +118,9 @@ public E get(int index) {
     return node(index).item;
 }
 ```
-LinkedList的添加元素的方法主要是调用linkLast和linkBefore两个方法，linkLast方法是在链表后面链接一个元素，linkBefore方法是在链表中间插入一个元素。LinkedList的删除方法通过调用unlink方法将某个元素从链表中移除。下面我们看看链表的插入和删除操作的核心代码。
+
+LinkedList 的添加元素的方法主要是调用 linkLast 和 linkBefore 两个方法，linkLast 方法是在链表后面链接一个元素，linkBefore 方法是在链表中间插入一个元素。LinkedList 的删除方法通过调用 unlink 方法将某个元素从链表中移除。下面我们看看链表的插入和删除操作的核心代码。
+
 ```java
 //链接到指定结点之前
 void linkBefore(E e, Node<E> succ) {
@@ -177,14 +184,16 @@ E unlink(Node<E> x) {
     return element;
 }
 ```
-linkBefore和unlink是具有代表性的链接结点和卸载结点的操作，其他的链接和卸载两端结点的方法与此类似，所以我们重点介绍linkBefore和unlink方法。
-linkBefore方法的过程图：
-![](img2.png)
 
-unlink方法的过程图：
-![](img3.png)
+linkBefore 和 unlink 是具有代表性的链接结点和卸载结点的操作，其他的链接和卸载两端结点的方法与此类似，所以我们重点介绍 linkBefore 和 unlink 方法。
+linkBefore 方法的过程图：
+![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
 
-通过上面图示看到对链表的插入和删除操作的时间复杂度都是O(1)，而对链表的查找和修改操作都需要遍历链表进行元素的定位，这两个操作都是调用的node(int index)方法定位元素，看看它是怎样通过下标来定位元素的。
+unlink 方法的过程图：
+![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
+
+通过上面图示看到对链表的插入和删除操作的时间复杂度都是 O(1)，而对链表的查找和修改操作都需要遍历链表进行元素的定位，这两个操作都是调用的 node(int index)方法定位元素，看看它是怎样通过下标来定位元素的。
+
 ```java
 //根据指定位置获取结点
 Node<E> node(int index) {
@@ -205,8 +214,10 @@ Node<E> node(int index) {
     }
 }
 ```
-通过下标定位时先判断是在链表的上半部分还是下半部分，如果是在上半部分就从头开始找起，如果是下半部分就从尾开始找起，因此通过下标的查找和修改操作的时间复杂度是O(n/2)。通过对双向链表的操作还可以实现单项队列，双向队列和栈的功能。
+
+通过下标定位时先判断是在链表的上半部分还是下半部分，如果是在上半部分就从头开始找起，如果是下半部分就从尾开始找起，因此通过下标的查找和修改操作的时间复杂度是 O(n/2)。通过对双向链表的操作还可以实现单项队列，双向队列和栈的功能。
 单向队列操作：
+
 ```java
 //获取头结点
 public E peek() {
@@ -235,7 +246,9 @@ public boolean offer(E e) {
     return add(e);
 }
 ```
+
 双向队列操作：
+
 ```java
 //在头部添加
 public boolean offerFirst(E e) {
@@ -261,7 +274,9 @@ public E peekLast() {
     return (l == null) ? null : l.item;
 }
 ```
+
 栈操作：
+
 ```java
 //入栈
 public void push(E e) {
@@ -273,8 +288,10 @@ public E pop() {
     return removeFirst();
 }
 ```
-不管是单向队列还是双向队列还是栈，其实都是对链表的头结点和尾结点进行操作，它们的实现都是基于addFirst()，addLast()，removeFirst()，removeLast()这四个方法，它们的操作和linkBefore()和unlink()类似，只不过一个是对链表两端操作，一个是对链表中间操作。可以说这四个方法都是linkBefore()和unlink()方法的特殊情况，因此不难理解它们的内部实现，在此不多做介绍。到这里，我们对LinkedList的分析也即将结束，对全文中的重点做个总结：
-1. LinkedList是基于双向链表实现的，不论是增删改查方法还是队列和栈的实现，都可通过操作结点实现
-2. LinkedList无需提前指定容量，因为基于链表操作，集合的容量随着元素的加入自动增加
-3. LinkedList删除元素后集合占用的内存自动缩小，无需像ArrayList一样调用trimToSize()方法
-4. LinkedList的所有方法没有进行同步，因此它也不是线程安全的，应该避免在多线程环境下使用
+
+不管是单向队列还是双向队列还是栈，其实都是对链表的头结点和尾结点进行操作，它们的实现都是基于 addFirst()，addLast()，removeFirst()，removeLast()这四个方法，它们的操作和 linkBefore()和 unlink()类似，只不过一个是对链表两端操作，一个是对链表中间操作。可以说这四个方法都是 linkBefore()和 unlink()方法的特殊情况，因此不难理解它们的内部实现，在此不多做介绍。到这里，我们对 LinkedList 的分析也即将结束，对全文中的重点做个总结：
+
+1. LinkedList 是基于双向链表实现的，不论是增删改查方法还是队列和栈的实现，都可通过操作结点实现
+2. LinkedList 无需提前指定容量，因为基于链表操作，集合的容量随着元素的加入自动增加
+3. LinkedList 删除元素后集合占用的内存自动缩小，无需像 ArrayList 一样调用 trimToSize()方法
+4. LinkedList 的所有方法没有进行同步，因此它也不是线程安全的，应该避免在多线程环境下使用
