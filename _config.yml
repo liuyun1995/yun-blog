@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://liuyun1995.github.io
+url: https://liuyun1995.gitee.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -99,5 +99,5 @@ theme: hexo-theme-next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repository: git@github.com:liuyun1995/liuyun1995.github.io.git
+  repository: git@gitee.com:liuyun1995/liuyun1995.git
   branch: master
