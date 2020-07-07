@@ -120,10 +120,10 @@ scheme: Gemini
 # When running the site in a subdirectory (e.g. yoursite.com/blog), remove the leading slash from link value (/archives -> archives).
 # External url should start with http:// or https://
 menu:
-  home: / || home
-  categories: /categories/ || th
-  archives: /archives/ || archive
-  about: /about/ || user
+  home: / || fa fa-home
+  categories: /categories/ || fa fa-th
+  archives: /archives/ || fa fa-archive
+  about: /about/ || fa fa-user
   #tags: /tags/ || tags
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
@@ -181,10 +181,10 @@ site_state: true
 # Key is the link label showing to end users.
 # Value before `||` delimiter is the target permalink, value after `||` delimiter is the name of Font Awesome icon.
 social:
-  E-Mail: mailto:liuyunplus@gmail.com || envelope
-  Telegram: https://t.me/liuyunplus || telegram
-  GitHub: https://github.com/liuyun1995 || github
-  YouTube: https://www.youtube.com/channel/UCEPdmUAEI2vnCCvrAkYPJBw || youtube
+  E-Mail: mailto:liuyunplus@gmail.com || fa fa-envelope
+  Telegram: https://t.me/liuyunplus || fab fa-telegram
+  GitHub: https://github.com/liuyun1995 || fab fa-github
+  YouTube: https://www.youtube.com/channel/UCEPdmUAEI2vnCCvrAkYPJBw || fab fa-youtube
   #Weibo: https://weibo.com/yourname || weibo
   #Google: https://plus.google.com/yourname || google
   #Twitter: https://twitter.com/yourname || twitter
