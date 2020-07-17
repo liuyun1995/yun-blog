@@ -4,7 +4,7 @@ date: 2019-11-10 21:00:24
 categories: Java并发
 ---
 现实生活中我们经常会遇到这样的情景，在进行某个活动前需要等待人全部都齐了才开始。例如吃饭时要等全家人都上座了才动筷子，旅游时要等全部人都到齐了才出发，比赛时要等运动员都上场后才开始。在 JUC 包中为我们提供了一个同步工具类能够很好的模拟这类场景，它就是 CyclicBarrier 类。<!-- more -->利用 CyclicBarrier 类可以实现一组线程相互等待，当所有线程都到达某个屏障点后再进行后续的操作。下图演示了这一过程。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B8%5D--CyclicBarrier%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.gif)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B8%5D--CyclicBarrier%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.gif)
 
 在 CyclicBarrier 类的内部有一个计数器，每个线程在到达屏障点的时候都会调用 await 方法将自己阻塞，此时计数器会减 1，当计数器减为 0 的时候所有因调用 await 方法而被阻塞的线程将被唤醒。这就是实现一组线程相互等待的原理，下面我们先看看 CyclicBarrier 有哪些成员变量。
 
@@ -260,6 +260,6 @@ public class HorseRace implements Runnable {
 ```
 
 该赛马程序主要是通过在控制台不停的打印各赛马的当前轨迹，以此达到动态显示的效果。整场比赛有多个轮次，每一轮次各个赛马都会随机走上几步然后调用 await 方法进行等待，当所有赛马走完一轮的时候将会执行任务将所有赛马的当前轨迹打印到控制台上。这样每一轮下来各赛马的轨迹都在不停的增长，当其中某个赛马的轨迹最先增长到指定的值的时候将会结束整场比赛，该赛马成为整场比赛的胜利者！程序的运行结果如下：
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B8%5D--CyclicBarrier%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.gif)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B8%5D--CyclicBarrier%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.gif)
 
 至此我们难免会将 CyclicBarrier 与 CountDownLatch 进行一番比较。这两个类都可以实现一组线程在到达某个条件之前进行等待，它们内部都有一个计数器，当计数器的值不断的减为 0 的时候所有阻塞的线程将会被唤醒。有区别的是 CyclicBarrier 的计数器由自己控制，而 CountDownLatch 的计数器则由使用者来控制，在 CyclicBarrier 中线程调用 await 方法不仅会将自己阻塞还会将计数器减 1，而在 CountDownLatch 中线程调用 await 方法只是将自己阻塞而不会减少计数器的值。另外，CountDownLatch 只能拦截一轮，而 CyclicBarrier 可以实现循环拦截。一般来说用 CyclicBarrier 可以实现 CountDownLatch 的功能，而反之则不能，例如上面的赛马程序就只能使用 CyclicBarrier 来实现。总之，这两个类的异同点大致如此，至于何时使用 CyclicBarrier，何时使用 CountDownLatch，还需要读者自己去拿捏。

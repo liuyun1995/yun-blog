@@ -34,11 +34,11 @@ private static int ctlOf(int rs, int wc) { return rs | wc; }
 ```
 
 在继续接下来的探究之前，我们先来搞清楚 ThreadPoolExecutor 是怎样存放状态信息和线程数信息的。ThreadPoolExecutor 利用原子变量 ctl 来同时存储运行状态和线程数的信息，其中高 3 位表示线程池的运行状态(runState)，后面的 29 位表示线程池中的线程数(workerCount)。上面代码中，runStateOf 方法是从 ctl 取出状态信息，workerCountOf 方法是从 ctl 取出线程数信息，ctlOf 方法是将状态信息和线程数信息糅合进 ctl 中。具体的计算过程如下图所示。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B10%5D--ThreadPoolExecutor%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B10%5D--ThreadPoolExecutor%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
 
 2.线程池各个状态的具体含义
 就像人的生老病死一样，线程池也有自己的生命周期，从创建到终止，线程池在每个阶段所做的事情是不一样的。新建一个线程池时它的状态为 Running，这时它不断的从外部接收并处理任务，当处理不过来时它会把任务放到任务队列中；之后我们可能会调用 shutdown()来终止线程池，这时线程池的状态从 Running 转为 Shutdown，它开始拒绝接收从外部传过来的任务，但是会继续处理完任务队列中的任务；我们也可能调用 shutdownNow()来立刻停止线程池，这时线程池的状态从 Running 转为 Stop，然后它会快速排空任务队列中的任务并转到 Tidying 状态，处于该状态的线程池需要执行 terminated()来做相关的扫尾工作，执行完 terminated()之后线程池就转为 Terminated 状态，表示线程池已终止。这些状态的转换图如下所示。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B10%5D--ThreadPoolExecutor%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B10%5D--ThreadPoolExecutor%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
 
 3.关键成员变量的介绍
 

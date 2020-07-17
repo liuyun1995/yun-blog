@@ -4,7 +4,7 @@ date: 2018-01-17 16:08:12
 categories: Java基础
 ---
 上篇我们分析了 ArrayList 的底层实现，知道了 ArrayList 底层是基于数组实现的，因此具有查找修改快而插入删除慢的特点。本篇介绍的 LinkedList 是 List 接口的另一种实现，它的底层是基于双向链表实现的，因此它具有插入删除快而查找修改慢的特点，此外，通过对双向链表的操作还可以实现队列和栈的功能。LinkedList 的底层结构如下图所示。<!-- more -->
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
 
 F 表示头结点引用，L 表示尾结点引用，链表的每个结点都有三个元素，分别是前继结点引用(P)，结点元素的值(E)，后继结点的引用(N)。结点由内部类 Node 表示，我们看看它的内部结构。
 
@@ -187,10 +187,10 @@ E unlink(Node<E> x) {
 
 linkBefore 和 unlink 是具有代表性的链接结点和卸载结点的操作，其他的链接和卸载两端结点的方法与此类似，所以我们重点介绍 linkBefore 和 unlink 方法。
 linkBefore 方法的过程图：
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
 
 unlink 方法的过程图：
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B2%5D--LinkedList%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
 
 通过上面图示看到对链表的插入和删除操作的时间复杂度都是 O(1)，而对链表的查找和修改操作都需要遍历链表进行元素的定位，这两个操作都是调用的 node(int index)方法定位元素，看看它是怎样通过下标来定位元素的。
 

@@ -17,7 +17,7 @@ public final void acquire(int arg) {
 ```
 
 上面代码中虽然看起来简单，但是它按照顺序执行了下图所示的 4 个步骤。下面我们会逐个步骤进行演示分析。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B2%5D--AQS%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%8B%AC%E5%8D%A0%E6%A8%A1%E5%BC%8F/img1.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B2%5D--AQS%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B9%8B%E7%8B%AC%E5%8D%A0%E6%A8%A1%E5%BC%8F/img1.png)
 
 第一步：!tryAcquire(arg)
 

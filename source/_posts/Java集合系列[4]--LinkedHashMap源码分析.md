@@ -6,7 +6,7 @@ categories: Java基础
 这篇文章我们开始分析 LinkedHashMap 的源码，LinkedHashMap 继承了 HashMap，也就是说 LinkedHashMap 是在 HashMap 的基础上扩展而来的，因此在看 LinkedHashMap 源码之前，读者有必要先去了解 HashMap 的源码，可以查看我上一篇文章的介绍《Java 集合系列[3]----HashMap 源码分析》。<!-- more -->只要深入理解了 HashMap 的实现原理，回过头来再去看 LinkedHashMap，HashSet 和 LinkedHashSet 的源码那都是非常简单的。因此，读者们好好耐下性子来研究研究 HashMap 源码吧，这可是买一送三的好生意啊。在前面分析 HashMap 源码时，我采用以问题为导向对源码进行分析，这样使自己不会像无头苍蝇一样乱分析一通，读者也能够针对问题更加深入的理解。本篇我决定还是采用这样的方式对 LinkedHashMap 进行分析。
 
 1.LinkedHashMap 内部采用了什么样的结构？
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B4%5D--LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B4%5D--LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
 
 可以看到，由于 LinkedHashMap 是继承自 HashMap 的，所以 LinkedHashMap 内部也还是一个哈希表，只不过 LinkedHashMap 重新写了一个 Entry，在原来 HashMap 的 Entry 上添加了两个成员变量，分别是前继结点引用和后继结点引用。这样就将所有的结点链接在了一起，构成了一个双向链表，在获取元素的时候就直接遍历这个双向链表就行了。我们看看 LinkedHashMap 实现的 Entry 是什么样子的。
 
@@ -86,7 +86,7 @@ void createEntry(int hash, K key, V value, int bucketIndex) {
 ```
 
 LinkedHashMap 重写了它的父类 HashMap 的 addEntry 和 createEntry 方法。当要插入一个键值对的时候，首先会调用它的父类 HashMap 的 put 方法。在 put 方法中会去检查一下哈希表中是不是存在了对应的 key，如果存在了就直接替换它的 value 就行了，如果不存在就调用 addEntry 方法去新建一个 Entry。注意，这时候就调用到了 LinkedHashMap 自己的 addEntry 方法。我们看到上面的代码，这个 addEntry 方法除了回调父类的 addEntry 方法之外还会调用 removeEldestEntry 去移除最老的元素，这步操作主要是为了实现 LRU 算法，下面会讲到。我们看到 LinkedHashMap 还重写了 createEntry 方法，当要新建一个 Entry 的时候最终会调用这个方法，createEntry 方法在每次将 Entry 放入到哈希表之后，就会调用 addBefore 方法将当前结点插入到双向链表的尾部。这样双向链表就记录了每次插入的结点的顺序，获取元素的时候只要遍历这个双向链表就行了，下图演示了每次调用 addBefore 的操作。由于是双向链表，所以将当前结点插入到头结点之前其实就是将当前结点插入到双向链表的尾部。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B4%5D--LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B4%5D--LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
 
 3.怎样利用 LinkedHashMap 实现 LRU 缓存？
 我们知道缓存的实现依赖于计算机的内存，而内存资源是相当有限的，不可能无限制的存放元素，所以我们需要在容量不够的时候适当的删除一些元素，那么到底删除哪个元素好呢？LRU 算法的思想是，如果一个数据最近被访问过，那么将来被访问的几率也更高。所以我们可以删除那些不经常被访问的数据。接下来我们看看 LinkedHashMap 内部是怎样实现 LRU 机制的。
@@ -192,4 +192,4 @@ public class LRUMap<K, V> extends LinkedHashMap<K, V> {
 ```
 
 结果如下：
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B4%5D--LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B4%5D--LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)

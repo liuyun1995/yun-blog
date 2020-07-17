@@ -4,7 +4,7 @@ date: 2018-01-18 16:17:11
 categories: Java基础
 ---
 前面我们已经分析了 ArrayList 和 LinkedList 这两个集合，我们知道 ArrayList 是基于数组实现的，LinkedList 是基于链表实现的。它们各自有自己的优劣势，例如 ArrayList 在定位查找元素时会优于 LinkedList，而 LinkedList 在添加删除元素时会优于 ArrayList。而本篇介绍的 HashMap 综合了二者的优势，它的底层是基于哈希表实现的，如果不考虑哈希冲突的话，HashMap 在增删改查操作上的时间复杂度都能够达到惊人的 O(1)。我们先看看它所基于的哈希表的结构。<!-- more -->
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B3%5D--HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B3%5D--HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
 
 从上图中可以看到，哈希表是由数组和链表共同构成的一种结构，当然上图是一个不好的示例，一个好的哈希函数应该要尽量平均元素在数组中的分布，减少哈希冲突从而减小链表的长度。链表的长度越长，意味着在查找时需要遍历的结点越多，哈希表的性能也就越差。接下来我们来看下 HashMap 的部分成员变量。
 
@@ -189,7 +189,7 @@ static int indexFor(int h, int length) {
 ```
 
 indexFor 方法是根据 hash 码来计算出在数组中对应的下标。我们可以看到在这个方法内部使用了与(&)操作符。与操作是对两个操作数进行位运算，如果对应的两个位都为 1，结果才为 1，否则为 0。与操作经常会用于去除操作数的高位值，例如：01011010 & 00001111 = 00001010。我们继续回到代码中，看看 h&(length-1)做了些什么。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B3%5D--HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B3%5D--HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
 
 已知传入的 length 是 Entry 数组的长度，我们知道数组下标是从 0 开始计算的，所以数组的最大下标为 length-1。如果 length 为 2 的幂，那么 length-1 的二进制位后面都为 1。这时 h&(length-1)的作用就是去掉了 h 的高位值，只留下 h 的低位值来作为数组的下标。由此可以看到 Entry 数组的大小规定为 2 的幂就是为了能够使用这个算法来确定数组的下标。
 
@@ -211,7 +211,7 @@ final int hash(Object k) {
 ```
 
 hash 方法的最后两行是真正计算 hash 值的算法，计算 hash 码的算法被称为扰动函数，所谓的扰动函数就是把所有东西杂糅到一起，可以看到这里使用了四个向右移位运算。目的就是将 h 的高位值与低位值混合一下，以此增加低位值的随机性。在上面我们知道定位数组的下标是根据 hash 码的低位值来确定的。key 的 hash 码是通过 hashCode 方法来生成的，而一个糟糕的 hashCode 方法生成的 hash 码的低位值可能会有很大的重复。为了使得 hash 码在数组上映射的比较均匀，扰动函数就派上用场了，把高位值的特性糅合进低位值，增加低位值的随机性，从而使散列分布的更加松散，以此提高性能。下图举了个例子帮助理解。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B3%5D--HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E9%9B%86%E5%90%88%E7%B3%BB%E5%88%97%5B3%5D--HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
 
 7.替代哈希是怎么回事？
 我们看到 hash 方法中首先会将 hashSeed 赋值给 h。这个 hashSeed 就是哈希种子，它是一个随机的值，作用就是帮助优化哈希函数。hashSeed 默认是 0，也就是默认不使用替代哈希算法。那么什么时候使用 hashSeed 呢？首先需要设置开启替代哈希，在系统属性中设置 jdk.map.althashing.threshold 的值，在系统属性中这个值默认是-1，当它是-1 的时候使用替代哈希的阀值为 Integer.MAX_VALUE。这也意味着可能你永远也不会使用替代哈希了。当然你可以把这个阀值设小一点，这样当集合元素达到阀值后就会生成一个随机的 hashSeed。以此增加 hash 函数的随机性。为什么要使用替代哈希呢？当集合元素达到你设定的阀值之后，意味着哈希表已经比较饱和了，出现哈希冲突的可能性就会大大增加，这时对再添加进来的元素使用更加随机的散列函数能够使后面添加进来的元素更加随机的分布在散列表中。

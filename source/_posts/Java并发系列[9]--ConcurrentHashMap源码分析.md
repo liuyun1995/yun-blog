@@ -4,7 +4,7 @@ date: 2019-11-10 21:04:55
 categories: Java并发
 ---
 我们知道哈希表是一种非常高效的数据结构，设计优良的哈希函数可以使其上的增删改查操作达到 O(1)级别。Java 为我们提供了一个现成的哈希结构，那就是 HashMap 类，在前面的文章中我曾经介绍过 HashMap 类，知道它的所有方法都未进行同步，因此在多线程环境中是不安全的。<!-- more -->为此，Java 为我们提供了另外一个 HashTable 类，它对于多线程同步的处理非常简单粗暴，那就是在 HashMap 的基础上对其所有方法都使用 synchronized 关键字进行加锁。这种方法虽然简单，但导致了一个问题，那就是在同一时间内只能由一个线程去操作哈希表。即使这些线程都只是进行读操作也必须要排队，这在竞争激烈的多线程环境中极为影响性能。本篇介绍的 ConcurrentHashMap 就是为了解决这个问题的，它的内部使用分段锁将锁进行细粒度化，从而使得多个线程能够同时操作哈希表，这样极大的提高了性能。下图是其内部结构的示意图。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B9%5D--ConcurrentHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B9%5D--ConcurrentHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img1.png)
 
 1.ConcurrentHashMap 有哪些成员变量？
 
@@ -140,7 +140,7 @@ static final <K,V> HashEntry<K,V> entryForHash(Segment<K,V> seg, int h) {
 a. 通过哈希码计算分段锁在数组中的下标：(h >>> segmentShift) & segmentMask。
 b. 通过哈希码计算元素在数组中的下标：(tab.length - 1) & h。
 现在我们假设传给构造器的两个参数为 initialCapacity=128, concurrencyLevel=16。根据计算可以得到 ssize=16, sshift=4，segmentShift=28，segmentMask=15。同样，算得每个分段锁内的 HashEntry 数组的长度为 8，所以 tab.length-1=7。根据这些值，我们通过下图来解释如何根据同一个哈希码来定位分段锁和元素。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B9%5D--ConcurrentHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B9%5D--ConcurrentHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img2.png)
 
 可以看到分段锁和元素的定位都是通过元素的哈希码来决定的。定位分段锁是取哈希码的高位值(从 32 位处取起)，定位元素是取的哈希码的低位值。现在有个问题，它们一个从 32 位的左端取起，一个从 32 位的右端取起，那么会在某个时刻产生冲突吗？我们在成员变量里可以找到 MAXIMUM_CAPACITY = 1 << 30，MAX_SEGMENTS = 1 << 16，这说明定位分段锁和定位元素使用的总的位数不超过 30，并且定位分段锁使用的位数不超过 16，所以至少还隔着 2 位的空余，因此是不会产生冲突的。
 
@@ -538,6 +538,6 @@ private void rehash(HashEntry<K,V> node) {
 ```
 
 rehash 方法在 put 方法中被调用，我们知道在 put 方法时会新建元素并添加到哈希数组中，随着元素的增多发生哈希冲突的可能性越大，哈希表的性能也会随之下降。因此每次 put 操作时都会检查元素总数是否超过阀值，如果超过则调用 rehash 方法进行扩容。因为数组长度一旦确定则不能再被改变，因此需要新建一个数组来替换原先的数组。从代码中可以知道新创建的数组长度为原数组的 2 倍(oldCapacity << 1)。创建好新数组后需要将旧数组中的所有元素移到新数组中，因此需要计算每个元素在新数组中的下标。计算新下标的过程如下图所示。
-![](https://gitee.com/liuyun1995/BlogImage/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B9%5D--ConcurrentHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/Java%E5%B9%B6%E5%8F%91%E7%B3%BB%E5%88%97%5B9%5D--ConcurrentHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/img3.png)
 
 我们知道下标直接取的是哈希码的后几位，由于新数组的容量是直接用旧数组容量右移 1 位得来的，因此掩码位数向右增加 1 位，取到的哈希码位数也向右增加 1 位。如上图，若旧的掩码值为 111，则元素下标为 101，扩容后新的掩码值为 1111，则计算出元素的新下标为 0101。由于同一条链表上的元素下标是相同的，现在假设链表所有元素的下标为 101，在扩容后该链表元素的新下标只有 0101 或 1101 这两种情况，因此数组扩容会打乱原先的链表并将链表元素分成两批。在计算出新下标后需要将元素移动到新数组中，在 HashMap 中通过直接修改 next 引用导致了多线程的死锁。虽然在 ConcurrentHashMap 中通过加锁避免了这种情况，但是我们知道 next 域是 volatile 类型的，它的改动能立马被读线程读取到，因此为保证线程安全采用复制元素来迁移数组。但是对链表中每个元素都进行复制有点影响性能，作者发现链表尾部有许多元素的 next 是不变的，它们在新数组中的下标是相同的，因此可以考虑整体移动这部分元素。具统计实际操作中只有 1/6 的元素是必须复制的，所以整体移动链表尾部元素(lastRun 后面的元素)是可以提升一定性能的。
