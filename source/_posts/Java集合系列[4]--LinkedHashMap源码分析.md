@@ -1,6 +1,6 @@
 ---
 title: 'Java 集合系列[4]--LinkedHashMap 源码分析'
-date: 2018-01-23 16:30:05
+date: 2018-03-03 16:30:05
 categories: Java基础
 ---
 这篇文章我们开始分析 LinkedHashMap 的源码，LinkedHashMap 继承了 HashMap，也就是说 LinkedHashMap 是在 HashMap 的基础上扩展而来的，因此在看 LinkedHashMap 源码之前，读者有必要先去了解 HashMap 的源码，可以查看我上一篇文章的介绍《Java 集合系列[3]----HashMap 源码分析》。<!-- more -->只要深入理解了 HashMap 的实现原理，回过头来再去看 LinkedHashMap，HashSet 和 LinkedHashSet 的源码那都是非常简单的。因此，读者们好好耐下性子来研究研究 HashMap 源码吧，这可是买一送三的好生意啊。在前面分析 HashMap 源码时，我采用以问题为导向对源码进行分析，这样使自己不会像无头苍蝇一样乱分析一通，读者也能够针对问题更加深入的理解。本篇我决定还是采用这样的方式对 LinkedHashMap 进行分析。

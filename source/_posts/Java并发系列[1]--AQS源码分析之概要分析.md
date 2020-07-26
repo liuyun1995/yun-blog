@@ -1,6 +1,6 @@
 ---
 title: 'Java 并发系列[1]--AQS 源码分析之概要分析'
-date: 2019-11-10 10:46:40
+date: 2018-03-15 10:46:40
 categories: Java并发
 ---
 学习 Java 并发编程不得不去了解一下 java.util.concurrent 这个包，这个包下面有许多我们经常用到的并发工具类，例如：ReentrantLock, CountDownLatch, CyclicBarrier, Semaphore 等。而这些类的底层实现都依赖于 AbstractQueuedSynchronizer 这个类，由此可见这个类的重要性。<!-- more -->所以在 Java 并发系列文章中我首先对 AbstractQueuedSynchronizer 这个类进行分析，由于这个类比较重要，而且代码比较长，为了尽可能分析的透彻一些，我决定用四篇文章对该类进行一个比较完整的介绍。本篇文章作为概要介绍主要是让读者们对该类有个初步了解。为了叙述简单，后续有些地方会用 AQS 代表这个类。

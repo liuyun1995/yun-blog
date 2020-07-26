@@ -1,6 +1,6 @@
 ---
 title: 'Java 集合系列[3]--HashMap 源码分析'
-date: 2018-01-18 16:17:11
+date: 2018-02-28 16:17:11
 categories: Java基础
 ---
 前面我们已经分析了 ArrayList 和 LinkedList 这两个集合，我们知道 ArrayList 是基于数组实现的，LinkedList 是基于链表实现的。它们各自有自己的优劣势，例如 ArrayList 在定位查找元素时会优于 LinkedList，而 LinkedList 在添加删除元素时会优于 ArrayList。而本篇介绍的 HashMap 综合了二者的优势，它的底层是基于哈希表实现的，如果不考虑哈希冲突的话，HashMap 在增删改查操作上的时间复杂度都能够达到惊人的 O(1)。我们先看看它所基于的哈希表的结构。<!-- more -->
