@@ -99,7 +99,7 @@ $ awk 'BEGIN{OFS="||"}{print $1,$2}' demo2.txt
 
 #### 4 模式匹配
 
-有时候我们并不需要对每一行都进行处理，而只是需要处理特定的某些行。awk提供了非常强大的模式匹配工具，不仅可以通过正则表达式匹配，还可以通过运算符匹配，下面是awk支持的一些运算符。
+有时候我们并不需要对每一行都进行处理，而只是需要处理特定的某些行。awk提供了非常强大的模式匹配工具，不仅可以通过正则表达式匹配，还可以通过运算符来匹配，或者通过结合二者来实现更为复杂的匹配。下面列出了可用的运算符列表。
 
 <table>
   <tr><th>符号类型</th><th>符号</th><th>含义</th></tr>
@@ -308,7 +308,7 @@ I got @ on the test
 
 日常项目中使用到Mybatis作为ORM框架时，我们会遇到根据Java类生成Mysql建表语句的场景，为了减少重复劳动，我们可以通过任意语言来实现这种需求，而使用awk脚本可以用非常少的代码量就能实现此类需求。
 
-1. 新建脚本文件create_table.awk，文件内容如下。
+1）新建脚本文件create_table.awk，文件内容如下：
 
 ```shell
 function getUnderScore(str) {
@@ -374,7 +374,7 @@ END{
 }
 ```
 
-2. 新建测试文件Product.java，文件内容如下。
+2）新建测试文件Product.java，文件内容如下：
 
 ```java
 public class Product {
@@ -386,7 +386,7 @@ public class Product {
 }
 ```
 
-3. 执行create_table.awk脚本，输出结果如下。
+3）执行create_table.awk脚本，输出结果如下：
 
 ```shell
 $ awk -f create_table.awk Product.java
@@ -401,3 +401,6 @@ CREATE TABLE `product` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
 
+#### 8 总结
+
+本文我们详细介绍了awk这门工具的基本使用，了解了awk的工作原理，知道了它所擅长的一些领域。其实描述awk为Linux环境下的命令行工具并不准确，它其实是一门编程语言，它不仅有内置的变量和函数，还具有流程控制语句，甚至我们可以自定义变量和函数。它的语法参照了C语言的编程风格，而且具有强大的动态类型推导能力，因此它比shell脚本更易于编程。确实，在很多方面可以用awk脚本来替代shell脚本帮助我们完成一些自动化的事情，因此熟练掌握好awk可以有效的提升我们的工作效率。
