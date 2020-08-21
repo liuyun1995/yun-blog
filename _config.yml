@@ -54,7 +54,7 @@ highlight:
 
 prism_plugin:
   mode: 'preprocess'
-  theme: 'tomorrow'
+  theme: 'vsc-dark-plus'
   line_number: true
   custom_css:
 

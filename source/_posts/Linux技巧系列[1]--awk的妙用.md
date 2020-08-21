@@ -10,11 +10,11 @@ awk是Linux及Unix环境中现有的功能最强大的数据处理引擎之一�
 
 #### 2 基本用法
 awk脚本可以直接通过参数传递给awk命令，如下所示，需要指明要处理的文件路径。
-```shell
+```bash
 $ awk 'BEGIN{}pattern{commands}END{}' file
 ```
 若脚本比较复杂，也可以将脚本单独存放到一个文件中，然后使用 -f 参数指定脚本文件的位置。
-```shell
+```bash
 $ awk -f 脚本文件 file
 ```
 #### 3 内置变量
@@ -33,7 +33,7 @@ $ awk -f 脚本文件 file
 
 假设我们有如下的测试数据：
 
-```shell
+```bash
 $ cat demo1.txt
 姓名 性别 年龄 籍贯 学历 职位
 张三 男 25 江西 本科 开发工程师
@@ -41,7 +41,7 @@ $ cat demo1.txt
 李丽 女 26 上海 本科 产品经理
 王五 男 29 广东 研究生 开发工程师
 ```
-```shell
+```bash
 $ cat demo2.txt
 姓名||性别||年龄||籍贯||学历||职位
 张三||男||25||江西||本科||开发工程师
@@ -52,7 +52,7 @@ $ cat demo2.txt
 
 1）只打印demo1文件的第1，2列的内容。
 
-```shell
+```bash
 $ awk '{print $1,$2}' demo1.txt
 姓名 性别
 张三 男
@@ -64,7 +64,7 @@ $ awk '{print $1,$2}' demo1.txt
 
 2）打印demo1文件每一行有多少列。
 
-```shell
+```bash
 $ awk '{print NF}' demo1.txt
 6
 6
@@ -75,7 +75,7 @@ $ awk '{print NF}' demo1.txt
 
 3）打印demo1文件，并在每行前面加上编号。
 
-```shell
+```bash
 $ awk '{print NR,$0}' demo1.txt
 1 姓名 性别 年龄 籍贯 学历 职位
 2 张三 男 25 江西 本科 开发工程师
@@ -86,7 +86,7 @@ $ awk '{print NR,$0}' demo1.txt
 
 4）只打印demo2文件的第1，3列的内容。
 
-```shell
+```bash
 $ awk 'BEGIN{OFS="||"}{print $1,$2}' demo2.txt
 姓名 年龄
 张三 25
@@ -117,14 +117,14 @@ $ awk 'BEGIN{OFS="||"}{print $1,$2}' demo2.txt
 </table> 
 1）只打印包含李四的行。
 
-```shell
+```bash
 $ awk '/李四/{print $0}' demo1.txt
 李四 男 34 湖南 博士 算法工程师
 ```
 
 2）只打印学历是本科的行。
 
-```shell
+```bash
 $ awk '$5=="本科"{print $0}' demo1.txt
 张三 男 25 江西 本科 开发工程师
 李丽 女 26 上海 本科 产品经理
@@ -132,7 +132,7 @@ $ awk '$5=="本科"{print $0}' demo1.txt
 
 3）只打印年龄小于30的行。
 
-```shell
+```bash
 $ awk '$3<30{print $0}' demo1.txt
 张三 男 25 江西 本科 开发工程师
 李丽 女 26 上海 本科 产品经理
@@ -140,7 +140,7 @@ $ awk '$3<30{print $0}' demo1.txt
 ```
 4）只打印年龄小于30并且学历不是本科的行。
 
-```shell
+```bash
 $ awk '$3<30&&$5!="本科"{print $0}' demo1.txt
 王五 男 29 广东 研究生 开发工程师
 ```
@@ -149,7 +149,7 @@ $ awk '$3<30&&$5!="本科"{print $0}' demo1.txt
 
 条件语句格式：
 
-```shell
+```bash
 # 条件语句1
 if (条件) {
   ...
@@ -172,7 +172,7 @@ if(条件1) {
 
 循环语句格式：
 
-```shell
+```bash
 # for循环示例
 for(i = 0; i < 100; i++) {
   ...
@@ -189,7 +189,7 @@ do {
 
 1）计算下列同学的平均分数，并且只打印平均分大于90分的同学姓名和平均分。
 
-```shell
+```bash
 $ cat demo3.txt
 小明 80 90 96 98
 李强 93 98 92 91
@@ -214,7 +214,7 @@ $ awk -f demo.awk demo3.txt
 
 使用for循环实现：
 
-```shell
+```bash
 $ cat for.awk
 BEGIN {
   for(i = 1; i <= 100; i++) {
@@ -228,7 +228,7 @@ $ awk -f for.awk
 
 使用while循环实现：
 
-```shell
+```bash
 $ cat while.awk
 BEGIN {
   while(i <= 100) {
@@ -242,7 +242,7 @@ $ awk -f while.awk
 ```
 使用do-while循环实现：
 
-```shell
+```bash
 $ cat doWhile.awk
 BEGIN {
   i = 1
@@ -272,34 +272,34 @@ $ awk -f while.awk
 
 1）搜索字符串 "I have a dream" 中出现 "ea" 字符串的位置。
 
-```shell
+```bash
 $ awk 'BEGIN{str="I have a dream"; location=index(str,"ea"); print location}'
 12
 ```
 
 2）将字符串 "Hadoop is a bigdata Framework" 全部转换为小写。
 
-```shell
+```bash
 $ awk 'BEGIN{str="Hadoop is a bigdata Framework"; print tolower(str)}'
 hadoop is a bigdata framework
 ```
 3）搜索字符串 "I got 90 on the test" 第一个数字出现的位置。
 
-```shell
+```bash
 $ awk 'BEGIN{str="I got 90 on the test"; location=match(str,/[0-9]/); print location}'
 7
 ```
 
 4）截取字符串 "I got 90 on the test" 的子串，截取条件是从第3个字符开始，截取6位。
 
-```shell
+```bash
 $ awk 'BEGIN{str="I got 90 on the test"; print substr(str,3,6)}'
 got 90
 ```
 
 5）替换字符串 "I got 90 on the test" 中第一个匹配到的数字串为@符号。
 
-```shell
+```bash
 $ awk 'BEGIN{str="I got 90 on the test"; sub(/[0-9]+/,"@",str); print str}'
 I got @ on the test
 ```
@@ -310,7 +310,7 @@ I got @ on the test
 
 1）新建脚本文件create_table.awk，文件内容如下：
 
-```shell
+```bash
 function getUnderScore(str) {
     gsub(/;/, "", str)
     while(match(str, /[A-Z]/)) {
@@ -388,7 +388,7 @@ public class Product {
 
 3）执行create_table.awk脚本，输出结果如下：
 
-```shell
+```bash
 $ awk -f create_table.awk Product.java
 DROP TABLE `product`;
 CREATE TABLE `product` (
