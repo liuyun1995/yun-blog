@@ -312,7 +312,6 @@ public class Thompson {
         return result;
     }
 
-
     /**
      * 连接运算
      * @param n
@@ -320,21 +319,22 @@ public class Thompson {
      * @return
      */
     public static NFA concat(NFA n, NFA m){
+        int nsize = n.states.size();
         //删除m的初始状态
         m.states.remove(0);
 
         //复制m的转移函数到n
         for (Transition t : m.transitions){
-            n.transitions.add(new Transition(t.from + n.states.size() - 1, t.to + n.states.size() - 1, t.symbol));
+            n.transitions.add(new Transition(t.from + nsize - 1, t.to + nsize - 1, t.symbol));
         }
 
         //添加m的状态到n中
         for (Integer s : m.states){
-            n.states.add(s + n.states.size() + 1);
+            n.states.add(s + nsize - 1);
         }
 
         //设置n的最终状态
-        n.finalState = n.states.size() + m.states.size() - 2;
+        n.finalState = nsize + m.states.size() - 1;
         return n;
     }
 
