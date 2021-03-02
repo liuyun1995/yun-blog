@@ -8,67 +8,17 @@
 #### 1 未提交读
 
 脏读示例：
-
-| 时间 | 事务A                               | 事务B                                         |
-| ---- | ----------------------------------- | --------------------------------------------- |
-| 1    | BEGIN                               | BEGIN                                         |
-| 2    | SELECT * FROM student WHERE id = 1; |                                               |
-| 3    |                                     | UPDATE student SET score = '90' WHERE id = 1; |
-| 4    | SELECT * FROM student WHERE id = 1; |                                               |
-| 5    | COMMIT                              | COMMIT                                        |
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/MySQL%E7%B3%BB%E5%88%97%5B1%5D--%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/1.png)
 
 #### 2 已提交读
 
 不可重复读示例：
-
-
-| 时间 | 事务A                     | 事务B                |
-| ---- | ------------------------ | ----------------------- |
-| 1    | BEGIN                    | BEGIN                  |
-| 2    | SELECT * FROM student WHERE id = 1; |                        |
-| 3    |              | UPDATE student SET score = '90' WHERE id = 1; |
-| 4    |              | COMMIT                                        |
-| 5    | SELECT * FROM student WHERE id = 1; |                        |
-| 6    | COMMIT                              |                        |
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/MySQL%E7%B3%BB%E5%88%97%5B1%5D--%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/2.png)
 
 #### 3 可重复读
 
 幻读示例：
-
-<table>
-  <tr><th>时间</th><th>事务A</th><th>事务B</th></tr>
-  <tr>
-      <td>1</td>
-      <td>BEGIN</td>
-      <td>BEGIN</td>
-  </tr>
-  <tr>
-      <td>2</td>
-      <td>SELECT * FROM student WHERE id = 1 FOR UPDATE</td>
-      <td></td>
-  </tr>
-  <tr>
-      <td>3</td>
-      <td></td>
-      <td>UPDATE student SET score = '90' WHERE id = 1;</td>
-  </tr>
-  <tr>
-      <td>4</td>
-      <td></td>
-      <td>COMMIT</td>
-  </tr>
-  <tr>
-      <td>5</td>
-      <td>SELECT * FROM student WHERE id = 1;</td>
-      <td></td>
-  </tr>
-  <tr>
-      <td>6</td>
-      <td>COMMIT</td>
-      <td></td>
-  </tr>
-</table> 
-
+![](https://gitee.com/liuyun1995/yun-blog-image/raw/master/MySQL%E7%B3%BB%E5%88%97%5B1%5D--%E4%BA%8B%E5%8A%A1%E7%9A%84%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/3.png)
 
 #### 4 序列化读
 
