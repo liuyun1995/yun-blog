@@ -167,7 +167,7 @@ sidebar:
 # Sidebar Avatar
 avatar:
   # Replace the default image and set the url here.
-  url: /images/avatar.jpg
+  url: /images/avatar.png
   # If true, the avatar will be dispalyed in circle.
   rounded: true
   # If true, the avatar will be rotated with the cursor.
@@ -183,7 +183,7 @@ site_state: true
 social:
   E-Mail: mailto:liuyunplus@gmail.com || fa fa-envelope
   Telegram: https://t.me/liuyunplus || fab fa-telegram
-  GitHub: https://github.com/liuyun1995 || fab fa-github
+  GitHub: https://github.com/liuyunplus || fab fa-github
   YouTube: https://www.youtube.com/channel/UCEPdmUAEI2vnCCvrAkYPJBw || fab fa-youtube
   #Weibo: https://weibo.com/yourname || weibo
   #Google: https://plus.google.com/yourname || google
