@@ -16,7 +16,7 @@ date: 2019-10-25 20:04:16
 
 ### 社交链接
 Email: liuyunplus@gmail.com
-Github: https://github.com/liuyun1995
+Github: https://github.com/liuyunplus
 Youtube: https://www.youtube.com/channel/UCEPdmUAEI2vnCCvrAkYPJBw
 BiliBili: https://space.bilibili.com/397475707
 
